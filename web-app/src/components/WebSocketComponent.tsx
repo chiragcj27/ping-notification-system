@@ -1,4 +1,3 @@
-"ue client"
 import { WebSocketProvider } from "@/context/WebSocketProvider";
 import UserList from "@/components/UserList";
 import BroadcastButton from "@/components/BroadcastButton";

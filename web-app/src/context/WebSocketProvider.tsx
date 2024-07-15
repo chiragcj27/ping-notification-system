@@ -2,6 +2,8 @@
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useToast } from "@/components/ui/use-toast";
+import connecting from "../../public/connecting.svg"
+import Image from "next/image";
 
 const WebSocketContext = createContext<any>(null);
 
@@ -22,9 +24,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
         ws.current = new WebSocket("wss://ping-notification-system-aixu.onrender.com");
 
         ws.current.onopen = () => {
-          toast({
-            title: `Welcome to PingAlert!`
-          })
+          console.log('WebSocket Connected');
           const userInfo = {
             type: "USER_INFO",
             email: session.user?.email,
@@ -120,9 +120,17 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
       });
     };
 
+  if(isConnecting){
+    return (
+      <div className="relative h-screen w-full inset-0 flex flex-col items-center justify-center ">
+      <Image className="h-72 w-72" src={connecting} alt="Connecting.." />
+      <p className="text-3xl">Connecting to websockets ...</p>
+    </div>
+    );
+  }
+
   return (
     <WebSocketContext.Provider value={{ connectedUsers, ws, session }}>
-      {isConnecting ? <div className="relative h-screen w-full inset-0 flex items-center justify-center text-4xl  ">Loading WebSocket connection...</div> : null}
       {children}
     </WebSocketContext.Provider>
   );
