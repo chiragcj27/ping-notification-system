@@ -14,10 +14,12 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
     { userId: string; email: string; name: string }[]
   >([]);
   const { toast } = useToast();
+  const [isConnecting, setIsConnecting] = useState<boolean>(true);
+
   useEffect(() => {
     if (session) {
       const connectWebSocket = () => {
-        ws.current = new WebSocket("ws://localhost:8080");
+        ws.current = new WebSocket("wss://ping-notification-system-aixu.onrender.com");
 
         ws.current.onopen = () => {
           toast({
@@ -28,7 +30,9 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
             email: session.user?.email,
             name: session.user?.name,
           };
-          ws.current?.send(JSON.stringify(userInfo));
+         if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify(userInfo));
+        }
         };
 
         ws.current.onmessage = (event) => {
@@ -62,8 +66,9 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
           console.log("Disconnected from WebSocket server");
           setTimeout(connectWebSocket, 1000);
         };
+        setIsConnecting(false);
       };
-
+      setIsConnecting(true);
       connectWebSocket();
 
       return () => {
@@ -117,6 +122,7 @@ export const WebSocketProvider = ({ children }: { children: React.ReactNode }) =
 
   return (
     <WebSocketContext.Provider value={{ connectedUsers, ws, session }}>
+      {isConnecting ? <div className="relative h-screen w-full inset-0 flex items-center justify-center text-4xl  ">Loading WebSocket connection...</div> : null}
       {children}
     </WebSocketContext.Provider>
   );
